@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.EmployeeTaskMapper">
+    <resultMap id="EmployeeTaskMap" type="com.mybatis.model.TEmployeeTask">
+        <id column="id" property="id" />
+        <result column="EMP_ID" property="empId" />
+        <result column="TASK_NAME" property="taskName" />
+        <result column="NOTE" property="note" />
+        <!-- 一级关联：一对一关联 -->
+        <association property="task" column="TASK_ID" select="com.mybatis.mapper.TaskMapper.getTask" />
+    </resultMap>
+    <!--  报错：Could not resolve type alias 'EmployeeTaskMap'.  Cause: java.lang.ClassNotFoundException: Cannot find
+        解决方法：把返回参数类型设置为：resultMap
+    -->
+    <select id="getEmployeeTaskByEmpId" parameterType="java.lang.Integer" resultMap="EmployeeTaskMap">
+        SELECT ID,EMP_ID,TASK_NAME,TASK_ID,NOTE FROM T_EMPLOYEE_TASK where emp_id = #{empId};
+    </select>
+</mapper>

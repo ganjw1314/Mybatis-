@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.WorkCarkMapper">
+    <!-- 工牌表 -->
+    <select id="getWorkCarkByEmpId" parameterType="java.lang.Integer" resultType="com.mybatis.model.TWorkCark">
+        SELECT ID,EMP_ID AS empId,REAL_NAME as realName,DEPARTMENT,MOBILE,POSITION,NOTE FROM t_work_cark where emp_id = #{empId};
+    </select>
+</mapper>

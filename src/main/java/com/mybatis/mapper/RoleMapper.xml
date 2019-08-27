@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.RoleMapper">
+    <resultMap id="roleMap" type="com.mybatis.model.Role">
+        <id column="ID" property="id" />
+        <result property="roleName" column="ROLE_NAME" javaType="java.lang.String" />
+        <result property="note" column="NOTE" javaType="java.lang.String" />
+    </resultMap>
+    <select id="findRoleById" resultMap="roleMap">
+        select * from role where id = #{id}
+  </select>
+    <insert id="insertRole" parameterType="com.mybatis.model.Role">
+        insert into role (ROLE_NAME,NOTE) values (#{roleName},#{note})
+    </insert>
+    <update id="updateRole" parameterType="com.mybatis.model.Role">
+        <!-- 报错：
+         org.apache.ibatis.reflection.ReflectionException: There is no getter for property named 'rolename' in 'class com.mybatis.Role'
+            导致的原因是：#{rolename},必须写成跟model里面的属性名称一致。
+         -->
+        update role set role_name = #{roleName},note = #{note} where id = #{id}
+    </update>
+
+    <delete id="deleteRole" parameterType="java.lang.Integer">
+        delete  from role where id =#{id}
+    </delete>
+
+    <!-- 角色名称进行模糊查询 -->
+    <!-- 报错：org.apache.ibatis.builder.IncompleteElementException: Could not find parameter map com.mybatis.RoleMapper.map
+        导致的原因：<select id="findRolesByMap" parameterMap="roleMap" resultType="com.mybatis.Role">中的
+        输入参数类型必须是 : parameterType="map" ;
+        输出参数可以是：
+            resultType="com.mybatis.Role"  即：模型路径.模型名称
+            resultMap="roleMap"
+     -->
+    <select id="findRolesByMap" parameterType="map" resultMap="roleMap">
+        select id,role_name,note from role where role_name like  concat('%', #{roleName}, '%')
+    </select>
+</mapper>

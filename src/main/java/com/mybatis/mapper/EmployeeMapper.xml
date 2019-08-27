@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybats.orig/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.EmployeeMapper">
+    <resultMap id="employee" type="com.mybatis.model.TEmployee">
+        <!-- ID,REALNAME,SEX,BIRTHDAY,MOBILE,EMAIL,POSITION,NOTE -->
+        <id column="id" property="id" />
+        <result property="realname" column="REALNAME" />
+        <result property="sex" column="SEX" />
+        <result property="birthday" column="BIRTHDAY" />
+        <result property="mobile" column="MOBILE" />
+        <result property="email" column="EMAIL" />
+        <result property="position" column="POSITION" />
+        <result property="note" column="NOTE" />
+        <!-- 一对一级联映射关系 -->
+        <association property="workCark" column="id" select="com.mybatis.mapper.WorkCarkMapper.getWorkCarkByEmpId" />
+        <!-- 一对多级联映射关系 -->
+        <collection property="employeeTasks" column="id" select="com.mybatis.mapper.EmployeeTaskMapper.getEmployeeTaskByEmpId" />
+        <!-- discriminator : 鉴别器 -->
+        <discriminator javaType="java.lang.Integer" column="sex">
+            <case value="1" resultMap="maleHealthFormMapper" />
+            <case value="0" resultMap="femaleHealthFormMapper" />
+        </discriminator>
+    </resultMap>
+    <!--  男性体检表 -->
+    <resultMap id="maleHealthFormMapper" type="com.mybatis.model.MaleEmployee" extends="employee">
+        <!-- 一对一级联映射关系 -->
+        <association property="maleHealthForm" column="id" select="com.mybatis.mapper.MaleHealthFormMapper.getMaleHealthForm" />
+    </resultMap>
+    <!--  女性体检表 -->
+    <resultMap id="femaleHealthFormMapper" type="com.mybatis.model.FemaleEmployee" extends="employee">
+        <!-- 一对一级联映射关系 -->
+        <association property="femaleHealthForm" column="id" select="com.mybatis.mapper.FemaleHealthFormMapper.getFemaleHealthForm" />
+    </resultMap>
+    <select id="getEmployeeById" parameterType="java.lang.Integer" resultMap="employee">
+        SELECT ID,REALNAME,SEX,BIRTHDAY,MOBILE,EMAIL,POSITION,NOTE from t_employee where ID  =#{id}
+    </select>
+
+    <!--  另一种的SQL的级联配置 -->
+    <select id="getEmployeeById1" parameterType="java.lang.Integer" resultMap="employee">
+        SELECT emp.ID,emp.EMAIL,emp.POSITION,emp.SEX,emp.BIRTHDAY,emp.MOBILE,emp.REALNAME,emp.NOTE,et.ID as et_id,et.TASK_ID as et_task_id,et.TASK_NAME as et_task_name,et.NOTE as et_note,
+        IF(emp.SEX = 1, mhf.ID,fhf.ID) as h_id,
+        IF(emp.SEX = 1, mhf.HEART,fhf.HEART) as h_HEART,
+        IF(emp.SEX = 1, mhf.LIVER,fhf.LIVER) as h_LIVER,
+        IF(emp.SEX = 1, mhf.SPLEEN,fhf.SPLEEN) as h_SPLEEN,
+        IF(emp.SEX = 1, mhf.LUNG,fhf.LUNG) as h_LUNG,
+        IF(emp.SEX = 1, mhf.KIDNEY,fhf.KIDNEY) as h_KIDNEY,
+        IF(emp.SEX = 1, mhf.NOTE,fhf.NOTE) as h_NOTE,
+        mhf.PROSTATE as h_prostate,fhf.UTERUS as h_uterus,
+        wc.id wc_id,wc.REAL_NAME as wc_real_name,wc.DEPARTMENT as wc_department,wc.MOBILE as wc_mpbile,wc.POSITION wc_position,
+        wc.NOTE wc_note,t.ID as t_id,t.TITLE t_title,t.CONTEXT t_context,t.NOTE t_note
+        FROM t_employee emp
+        LEFT JOIN t_employee_task et on emp.ID = et.EMP_ID
+        LEFT JOIN t_male_health_form mhf on emp.ID = mhf.EMP_ID
+        LEFT JOIN t_female_health_form fhf on emp.ID = fhf.EMP_ID
+        LEFT JOIN t_work_cark wc on emp.ID = wc.EMP_ID
+        LEFT JOIN t_task t on et.TASK_ID = t.ID
+        where emp.ID  =#{id}
+    </select>
+
+</mapper>

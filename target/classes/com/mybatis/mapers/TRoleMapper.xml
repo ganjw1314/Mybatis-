@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapers.TRoleMapper">
+    <resultMap id="roleMapper" type="com.mybatis.bo.TRole">
+        <id column="ROLE_ID" property="roleId" />
+        <result column="ROLE_NAME" property="roleName" />
+        <result column="NOTE" property="note" />
+        <!-- 一对多级联关系 -->
+        <collection property="userList" column="ROLE_ID" ofType="roleMapper" fetchType="lazy" select="com.mybatis.mapers.TUserMapper.findUserByRoleId" />
+    </resultMap>
+
+    <!-- 根据角色编号查询角色信息 -->
+    <select id="getRole" parameterType="java.lang.String" resultMap="roleMapper">
+        SELECT ROLE_ID,ROLE_NAME,NOTE FROM T_ROLE where ROLE_ID = #{roleId}
+    </select>
+    <!-- 根据用户编号查询角色信息 -->
+    <select id="findRoleByUserId" parameterType="java.lang.String" resultMap="roleMapper">
+        SELECT r.ROLE_ID,r.ROLE_NAME,r.NOTE FROM T_ROLE r,T_USER_ROLE ur where r.ROLE_ID = ur.ROLE_ID AND ur.USER_ID = #{userId}
+    </select>
+    <!-- 插入角色信息记录 -->
+    <insert id="insertRole" parameterType="com.mybatis.bo.TRole">
+        INSERT INTO t_role(ROLE_ID,ROLE_NAME,NOTE) VALUES(#{roleId},#{roleName},#{note})
+    </insert>
+</mapper>
